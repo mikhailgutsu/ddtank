@@ -37,6 +37,10 @@ class CocoaBorderOverlay:
         self._grid_columns = 10
         self._grid_layers = []  # CASublayers for vertical lines
 
+        self._esp_enabled = False
+        self._esp_rect = None      # (x, y, w, h) în coord. overlay
+        self._esp_layers = []      # layere pentru rect + linii interioare
+
         self.window.orderFrontRegardless()
 
     def _clear_grid_layers(self):
@@ -70,6 +74,58 @@ class CocoaBorderOverlay:
             line.setBackgroundColor_(green)
             content_layer.addSublayer_(line)
             self._grid_layers.append(line)
+
+    def _clear_esp_layers(self):
+        content_layer = self.window.contentView().layer()
+        for l in self._esp_layers:
+            l.removeFromSuperlayer()
+        self._esp_layers = []
+
+    def _rebuild_esp_layers(self):
+        self._clear_esp_layers()
+        if not (self._esp_enabled and self._esp_rect):
+            return
+        from Quartz import CALayer
+        x, y, w, h = map(int, self._esp_rect)
+
+        # border alb semi-transparent
+        white = NSColor.whiteColor().colorWithAlphaComponent_(0.8).CGColor()
+        rect = CALayer.layer()
+        rect.setFrame_(((x, y), (w, h)))
+        rect.setBorderWidth_(1.0)
+        rect.setBorderColor_(white)
+        rect.setBackgroundColor_(NSColor.clearColor().CGColor())
+        self.window.contentView().layer().addSublayer_(rect)
+        self._esp_layers.append(rect)
+
+        # grid interior fin (ex: 20×12)
+        cols, rows = 20, 12
+        line_c = NSColor.whiteColor().colorWithAlphaComponent_(0.25).CGColor()
+
+        # linii verticale
+        step_x = w / cols
+        for i in range(1, cols):
+            vx = int(round(x + i * step_x))
+            v = CALayer.layer()
+            v.setFrame_(((vx, y), (1, h)))
+            v.setBackgroundColor_(line_c)
+            rect.addSublayer_(v)
+            self._esp_layers.append(v)
+
+        # linii orizontale
+        step_y = h / rows
+        for j in range(1, rows):
+            hy = int(round(y + j * step_y))
+            hline = CALayer.layer()
+            hline.setFrame_(((x, hy), (w, 1)))
+            hline.setBackgroundColor_(line_c)
+            rect.addSublayer_(hline)
+            self._esp_layers.append(hline)
+
+    def set_esp(self, enabled: bool, rect_xywh):
+        self._esp_enabled = bool(enabled)
+        self._esp_rect = rect_xywh
+        self._rebuild_esp_layers()
 
     def set_grid(self, enabled: bool, columns: int = 10):
         """Public: configurează grid-ul (on/off, nr. coloane)."""

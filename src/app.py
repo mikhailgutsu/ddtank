@@ -5,6 +5,11 @@ from src.overlay import CocoaBorderOverlay
 from src.side_panel import TkSidePanel
 # from src.capture import capture_window_image  # enable if you want the heartbeat image
 
+MINIMAP_RIGHT_PCT = 0.015   # margine dreapta până la marginea mini-hărții
+MINIMAP_TOP_PCT   = 0.035   # margine sus până la mini-hartă
+MINIMAP_W_PCT     = 0.28    # lățimea mini-hărții
+MINIMAP_H_PCT     = 0.18    # înălțimea mini-hărții
+
 class SurfTankWatcherApp:
     """
     Tk shell for status + timer; Cocoa overlay draws the red border.
@@ -19,6 +24,7 @@ class SurfTankWatcherApp:
         self.panel_gap = int(panel_gap)
 
         self.grid_on = False
+        self.esp_on = False
 
         self.root = tk.Tk()
         self.root.title("SurfTank watcher")
@@ -36,7 +42,8 @@ class SurfTankWatcherApp:
             master=self.root,
             width=self.panel_width,
             border_width=self.border_width,
-            on_grid_click=self._arena_action,  # va primi bool
+            on_grid_click=self._grid_action,
+            on_esp_click=self._esp_action,  # va primi bool
         )
 
         self.root.after(0, self._poll_loop)
@@ -56,22 +63,8 @@ class SurfTankWatcherApp:
                 self.side_panel.hide()
             else:
                 x, y, w, h = window_bounds(win)
-
-                # Optional: capture for heartbeat (disabled by default)
-                # img = capture_window_image(win)
-                # if img is None:
-                #     self.status.config(
-                #         text=f"{self.target_app} found, capture failed âš ï¸ (check Screen Recording)",
-                #         fg="orange"
-                #     )
-                #     self.overlay.hide()
-                #     self._schedule_next()
-                #     return
-
-                self.status.config(
-                    text=f"{self.target_app} connected âœ…  size: {w}Ã—{h}  pos: {x},{y}",
-                    fg="green",
-                )
+                self.status.config(text=f"{self.target_app} connected ✅  size: {w}×{h}  pos: {x},{y}",
+                                   fg="green")
                 self.overlay.show_at(x, y, w, h)
 
                 panel_x = x + w + self.margin + self.panel_gap
@@ -79,7 +72,22 @@ class SurfTankWatcherApp:
                 panel_h = h + 2 * self.margin
                 self.side_panel.show_at(panel_x, panel_y, panel_h)
 
+                # GRID redraw
                 self.overlay.set_grid(self.grid_on, columns=10)
+
+                # ESP rect (dinamic, în procente)
+                if self.esp_on:
+                    # calculează rect-ul mini-hărții în coordonate overlay
+                    mm_w = int(w * MINIMAP_W_PCT)
+                    mm_h = int(h * MINIMAP_H_PCT)
+                    mm_right = int(w * MINIMAP_RIGHT_PCT)
+                    mm_top = int(h * MINIMAP_TOP_PCT)
+                    # colțul stânga-sus al mini-hărții față de fereastra jocului
+                    mm_x = (x + w - mm_right - mm_w) - (x - self.margin)  # translatare în overlay
+                    mm_y = self.margin + (h - mm_top - mm_h)
+                    self.overlay.set_esp(True, (mm_x, mm_y, mm_w, mm_h))
+                else:
+                    self.overlay.set_esp(False, None)
 
         except Exception as e:
             self.status.config(text=f"Error: {e}", fg="red")
@@ -93,7 +101,7 @@ class SurfTankWatcherApp:
     def run(self):
         self.root.mainloop()
 
-    def _arena_action(self, is_on: bool):
+    def _grid_action(self, is_on: bool):
         """Primește True/False de la butonul toggle."""
         self.grid_on = bool(is_on)
         if self.grid_on:
@@ -101,3 +109,12 @@ class SurfTankWatcherApp:
         else:
             self.status.config(text="GRID OFF: grid ascuns ⛔", fg="blue")
         self.overlay.set_grid(self.grid_on, columns=10)
+
+    def _esp_action(self, is_on: bool):
+        self.esp_on = bool(is_on)
+        if self.esp_on:
+            self.status.config(text="ESP ON: mini-hartă marcată ✅", fg="blue")
+        else:
+            self.status.config(text="ESP OFF: mini-hartă ascunsă ⛔", fg="blue")
+            # ascunde layerele ESP când se stinge
+            self.overlay.set_esp(False, None)
