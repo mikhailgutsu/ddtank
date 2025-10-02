@@ -36,7 +36,7 @@ class SurfTankWatcherApp:
             master=self.root,
             width=self.panel_width,
             border_width=self.border_width,
-            on_arena_click=self._arena_action,  # va primi bool
+            on_grid_click=self._arena_action,  # va primi bool
         )
 
         self.root.after(0, self._poll_loop)

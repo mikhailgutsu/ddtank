@@ -7,10 +7,10 @@ class TkSidePanel:
       - 10 buttons stacked vertically,
       - first button is 'GRID' (call the given callback).
     """
-    def __init__(self, master, width: int, border_width: int, on_arena_click):
+    def __init__(self, master, width: int, border_width: int, on_grid_click):
         self.width = int(width)
         self.border_width = int(border_width)
-        self.on_arena_click = on_arena_click
+        self.on_grid_click = on_grid_click
         self.arena_on = False
 
         self.win = tk.Toplevel(master)
@@ -76,8 +76,8 @@ class TkSidePanel:
                 activebackground=self._arena_default_activebg,
                 fg=self._arena_default_fg
             )
-        if callable(self.on_arena_click):
-            self.on_arena_click(self.arena_on)
+        if callable(self.on_grid_click):
+            self.on_grid_click(self.arena_on)
 
     def show_at(self, x_left: int, y_top: int, height: int):
         """
