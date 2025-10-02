@@ -5,10 +5,10 @@ from src.overlay import CocoaBorderOverlay
 from src.side_panel import TkSidePanel
 # from src.capture import capture_window_image  # enable if you want the heartbeat image
 
-MINIMAP_RIGHT_PCT = 0.015   # margine dreapta până la marginea mini-hărții
-MINIMAP_TOP_PCT   = 0.035   # margine sus până la mini-hartă
-MINIMAP_W_PCT     = 0.28    # lățimea mini-hărții
-MINIMAP_H_PCT     = 0.18    # înălțimea mini-hărții
+MINIMAP_RIGHT_PCT = 0.028   # margine dreapta până la marginea mini-hărții
+MINIMAP_TOP_PCT   = 0.07   # margine sus până la mini-hartă
+MINIMAP_W_PCT     = 0.133   # lățimea mini-hărții
+MINIMAP_H_PCT     = 0.155    # înălțimea mini-hărții
 
 class SurfTankWatcherApp:
     """
