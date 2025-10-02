@@ -1,4 +1,3 @@
-# Convert CGImage to PIL.Image for a lightweight "connected" heartbeat
 from Quartz import CGWindowListCreateImage, kCGWindowListOptionIncludingWindow, kCGWindowImageDefault
 from Quartz import CoreGraphics as CG
 from PIL import Image
@@ -11,7 +10,6 @@ def capture_window_image(win_info):
         return None
 
     b = win_info["kCGWindowBounds"]
-    # Some PyObjC builds map keys differently; prefer direct access for robustness:
     b = win_info.get("kCGWindowBounds", win_info.get(CG.kCGWindowBounds)) or win_info.get(CG.kCGWindowBounds)
 
     if not b:
@@ -40,6 +38,5 @@ def capture_window_image(win_info):
     data = CG.CGDataProviderCopyData(provider)
     buf = bytes(data)
 
-    # macOS returns BGRA premultiplied; Pillow will interpret as RGBA when told "raw"/"BGRA"
     img = Image.frombuffer("RGBA", (width, height), buf, "raw", "BGRA", rowbytes, 1)
     return img

@@ -18,11 +18,10 @@ class TkSidePanel:
         self.esp_on = False
 
         self.win = tk.Toplevel(master)
-        self.win.overrideredirect(True)   # clean panel (no title bar)
+        self.win.overrideredirect(True)   
         self.win.attributes("-topmost", True)
-        self.win.withdraw()               # hidden until shown
+        self.win.withdraw()               
 
-        # outer frame with red border
         self.outer = tk.Frame(
             self.win,
             bg="red",
@@ -31,17 +30,14 @@ class TkSidePanel:
         )
         self.outer.pack(fill="both", expand=True)
 
-        # inner area with neutral bg
         self.inner = tk.Frame(self.outer, bg="#1d1d1f")
         self.inner.pack(fill="both", expand=True, padx=1, pady=1)
 
-        # create buttons
         self._build_buttons(self.inner)
 
         self.visible = False
 
     def _build_buttons(self, parent):
-        # GRID toggle (fost ARENA)
         self.arena_btn = tk.Button(parent, text="GRID: OFF", height=2, command=self._toggle_arena)
         self.arena_btn.pack(fill="x", padx=10, pady=6)
         self._arena_default_bg  = self.arena_btn.cget("bg")
@@ -51,7 +47,6 @@ class TkSidePanel:
         except tk.TclError:
             self._arena_default_activebg = self._arena_default_bg
 
-        # ESP toggle (nou)
         self.esp_btn = tk.Button(parent, text="ESP: OFF", height=2, command=self._toggle_esp)
         self.esp_btn.pack(fill="x", padx=10, pady=6)
         self._esp_default_bg  = self.esp_btn.cget("bg")
@@ -61,7 +56,6 @@ class TkSidePanel:
         except tk.TclError:
             self._esp_default_activebg = self._esp_default_bg
 
-        # restul butoanelor
         for i in range(3, 11):
             b = tk.Button(parent, text=f"Button {i}", height=2)
             b.pack(fill="x", padx=10, pady=6)
@@ -99,7 +93,6 @@ class TkSidePanel:
         """
         Place the panel at given top-left (global coords) with the given height.
         """
-        # geometry string supports signed coords
         self.win.geometry(f"{self.width}x{height}{x_left:+}{y_top:+}")
         if not self.visible:
             self.win.deiconify()

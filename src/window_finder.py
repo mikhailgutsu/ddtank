@@ -1,4 +1,3 @@
-# Quartz-based window discovery (read-only)
 from Quartz import (
     CGWindowListCopyWindowInfo,
     kCGWindowListOptionOnScreenOnly,
@@ -27,7 +26,6 @@ def find_target_window(owner_substring: str):
     if not candidates:
         return None
 
-    # prefer the largest area as the main game window
     best = max(candidates, key=lambda w: w[kCGWindowBounds]["Width"] * w[kCGWindowBounds]["Height"])
     return best
 

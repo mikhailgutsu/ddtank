@@ -15,7 +15,6 @@ class CocoaBorderOverlay:
         self.border_width = int(border_width)
         self.margin = int(margin)
 
-        # Minimal rect; real frame set in show_at()
         rect = CG.CGRectMake(0, 0, 10, 10)
         self.window = NSWindow.alloc().initWithContentRect_styleMask_backing_defer_(
             rect, NSWindowStyleMaskBorderless, NSBackingStoreBuffered, False
@@ -32,14 +31,13 @@ class CocoaBorderOverlay:
         layer.setBorderColor_(NSColor.redColor().CGColor())
         layer.setBorderWidth_(self.border_width)
 
-        # grid state
         self._grid_enabled = False
         self._grid_columns = 10
-        self._grid_layers = []  # CASublayers for vertical lines
+        self._grid_layers = []  
 
         self._esp_enabled = False
-        self._esp_rect = None      # (x, y, w, h) în coord. overlay
-        self._esp_layers = []      # layere pentru rect + linii interioare
+        self._esp_rect = None     
+        self._esp_layers = []      
 
         self.window.orderFrontRegardless()
 
@@ -57,19 +55,15 @@ class CocoaBorderOverlay:
             return
 
         content_layer = self.window.contentView().layer()
-        # evităm să desenăm pe marginile roșii; grid-ul ocupă tot frame-ul overlay
-        # facem N-1 linii verticale
         cols = self._grid_columns
         step = width / cols
 
-        # culoare verde cu ușor alpha
         green = NSColor.greenColor().colorWithAlphaComponent_(0.7).CGColor()
 
-        from Quartz import CALayer  # expus de PyObjC prin Quartz.CoreAnimation
+        from Quartz import CALayer 
         for i in range(1, cols):
             x = int(round(i * step))
             line = CALayer.layer()
-            # 1 px grosime; vertical pe înălțimea ferestrei overlay
             line.setFrame_(((x, 0), (1, height)))
             line.setBackgroundColor_(green)
             content_layer.addSublayer_(line)
@@ -88,7 +82,6 @@ class CocoaBorderOverlay:
         from Quartz import CALayer
         x, y, w, h = map(int, self._esp_rect)
 
-        # border alb semi-transparent
         white = NSColor.whiteColor().colorWithAlphaComponent_(0.8).CGColor()
         rect = CALayer.layer()
         rect.setFrame_(((x, y), (w, h)))
@@ -98,11 +91,9 @@ class CocoaBorderOverlay:
         self.window.contentView().layer().addSublayer_(rect)
         self._esp_layers.append(rect)
 
-        # grid interior fin (ex: 20×12)
         cols, rows = 20, 12
         line_c = NSColor.whiteColor().colorWithAlphaComponent_(0.25).CGColor()
 
-        # linii verticale
         step_x = w / cols
         for i in range(1, cols):
             vx = int(round(x + i * step_x))
@@ -112,7 +103,6 @@ class CocoaBorderOverlay:
             rect.addSublayer_(v)
             self._esp_layers.append(v)
 
-        # linii orizontale
         step_y = h / rows
         for j in range(1, rows):
             hy = int(round(y + j * step_y))
@@ -128,10 +118,8 @@ class CocoaBorderOverlay:
         self._rebuild_esp_layers()
 
     def set_grid(self, enabled: bool, columns: int = 10):
-        """Public: configurează grid-ul (on/off, nr. coloane)."""
         self._grid_enabled = bool(enabled)
         self._grid_columns = max(2, int(columns))
-        # rebuild imediat la dimensiunea curentă
         ow = int(self.window.contentView().frame().size.width)
         oh = int(self.window.contentView().frame().size.height)
         self._rebuild_grid_layers(ow, oh)
@@ -146,19 +134,15 @@ class CocoaBorderOverlay:
         ow = int(w + 2 * self.margin)
         oh = int(h + 2 * self.margin)
 
-        # Convert top-left from Quartz (origin: top-left) to AppKit's expected top-left Y.
         H_main = int(CG.CGDisplayBounds(CG.CGMainDisplayID()).size.height)
-        ay_top = H_main - oy  # flipped Y for AppKit top edge
+        ay_top = H_main - oy 
 
-        # Anchor by top-left, then set size
         self.window.setFrameTopLeftPoint_((ox, ay_top))
         self.window.setContentSize_((ow, oh))
 
-        # Keep border width consistent after resize
         layer = self.window.contentView().layer()
         layer.setBorderWidth_(self.border_width)
 
-        # rebuild grid on resize/move
         self._rebuild_grid_layers(ow, oh)
         self.window.orderFrontRegardless()
 
