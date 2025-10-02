@@ -18,6 +18,8 @@ class SurfTankWatcherApp:
         self.panel_width = int(panel_width)
         self.panel_gap = int(panel_gap)
 
+        self.grid_on = False
+
         self.root = tk.Tk()
         self.root.title("SurfTank watcher")
         self.root.geometry("420x160")
@@ -34,7 +36,7 @@ class SurfTankWatcherApp:
             master=self.root,
             width=self.panel_width,
             border_width=self.border_width,
-            on_arena_click=self._arena_action,
+            on_arena_click=self._arena_action,  # va primi bool
         )
 
         self.root.after(0, self._poll_loop)
@@ -74,8 +76,10 @@ class SurfTankWatcherApp:
 
                 panel_x = x + w + self.margin + self.panel_gap
                 panel_y = y
-                panel_h = h + 2 * self.margin  # make it match the outer border height
+                panel_h = h + 2 * self.margin
                 self.side_panel.show_at(panel_x, panel_y, panel_h)
+
+                self.overlay.set_grid(self.grid_on, columns=10)
 
         except Exception as e:
             self.status.config(text=f"Error: {e}", fg="red")
@@ -89,6 +93,11 @@ class SurfTankWatcherApp:
     def run(self):
         self.root.mainloop()
 
-    def _arena_action(self):
-        # TODO: hook real action later (focus game / navigate etc.)
-        self.status.config(text="ARENA clicked ✅", fg="blue")
+    def _arena_action(self, is_on: bool):
+        """Primește True/False de la butonul toggle."""
+        self.grid_on = bool(is_on)
+        if self.grid_on:
+            self.status.config(text="GRID ON: grid 10 coloane activ ✅", fg="blue")
+        else:
+            self.status.config(text="GRID OFF: grid ascuns ⛔", fg="blue")
+        self.overlay.set_grid(self.grid_on, columns=10)

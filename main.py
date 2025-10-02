@@ -2,7 +2,7 @@
 TARGET_APP = "SurfTank"   # window owner name substring to search for
 POLL_MS = 1000            # capture/poll interval in milliseconds
 BORDER_WIDTH = 4          # overlay border thickness (px)
-MARGIN = 8                # overlay extra padding around the game window (px)
+MARGIN = 2                # overlay extra padding around the game window (px)
 
 # side panel sizing and gap
 PANEL_WIDTH = 220      # px (narrow & tall)
